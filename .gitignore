@@ -1,0 +1,58 @@
+# Зависимости (Node.js, Python, PHP и т.д.)
+node_modules/
+vendor/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Логи и базы данных
+*.log
+*.sqlite
+*.sqlite3
+*.db
+
+# Среда разработки и ОС
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Настройки IDE (общие)
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# Собранные файлы (билды)
+dist/
+build/
+out/
+*.class
+*.jar
+*.war
+*.ear
+target/
+
+# Временные файлы
+*.tmp
+*.temp
+.cache/
+
+# Секреты и переменные окружения
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+*.p12
+
