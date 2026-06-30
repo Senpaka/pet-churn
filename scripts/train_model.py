@@ -1,5 +1,6 @@
 import sys
 
+from mlflow import MlflowClient
 from mlflow.models import infer_signature
 from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
 from sklearn.metrics import roc_auc_score, accuracy_score, f1_score, precision_score, recall_score
@@ -11,7 +12,7 @@ import numpy as np
 import os
 import optuna
 
-from shared.create_feature import CreateFeature
+from shared.features import FeatureBuilder
 from scripts.config import config
 
 from pathlib import Path
@@ -40,7 +41,7 @@ class TrainModel:
 
         self.model = None
         self.metrics = None
-        self.feature = CreateFeature()
+        self.feature_builder = FeatureBuilder()
         self.is_train = False
 
         logger.info("TrainModel инициализирован")
@@ -56,7 +57,7 @@ class TrainModel:
             raise ValueError("Отсутствует целевая переменная")
 
         logger.info("Старт обучения")
-        df_train = self.feature.create_feature(df)
+        df_train = self.feature_builder.build(df)
         logger.info("Фичи созданы")
 
         X = df_train.drop(columns=["Churn"], axis=1)
@@ -79,7 +80,7 @@ class TrainModel:
                     load_if_exists=True
                 )
 
-                study.optimize(lambda trial: self.objective(trial, X_train, y_train), n_trials=100, n_jobs=1)
+                study.optimize(lambda trial: self.objective(trial, X_train, y_train), n_trials=10, n_jobs=1)
 
                 mlflow.log_metric("best_roc_auc", study.best_value)
 
@@ -96,13 +97,15 @@ class TrainModel:
 
                 logger.info("Обучение с оптуной")
 
-                self.model = CatBoostClassifier(
-                    iterations=config.MODEL_ITERATIONS,
-                    random_seed=config.RANDOM_SEED,
-                    verbose=config.VERBOSE,
-                    auto_class_weights=config.AUTO_CLASS_WEIGHTS,
+                params = {
+                    "iterations": config.MODEL_ITERATIONS,
+                    "random_seed": config.RANDOM_SEED,
+                    "verbose": config.VERBOSE,
+                    "auto_class_weights": config.AUTO_CLASS_WEIGHTS,
                     **study.best_params
-                )
+                }
+
+                self.model = CatBoostClassifier(**params)
 
                 logger.info("Модель создана")
 
@@ -110,18 +113,21 @@ class TrainModel:
             logger.exception(f"Не удалось загрузить параметры Optuna, запускаем с дефолтными параметрами: {e}")
             logger.info("Обучение без оптуны")
 
-            self.model = CatBoostClassifier(
-                iterations=config.MODEL_ITERATIONS,
-                learning_rate=config.LEARNING_RATE,
-                depth=config.DEPTH,
-                l2_leaf_reg=config.L2_LEAF,
-                random_strength=config.RANDOM_STRENGTH,
-                bagging_temperature=config.BAGGING_TEMPERATURE,
-                auto_class_weights=config.AUTO_CLASS_WEIGHTS,
-                random_state=config.RANDOM_SEED,
-                verbose=config.VERBOSE,
-                thread_count=config.THREADS_COUNT
-            )
+            params = {
+                "iterations":config.MODEL_ITERATIONS,
+                "learning_rate": config.LEARNING_RATE,
+                "depth": config.DEPTH,
+                "l2_leaf_reg": config.L2_LEAF,
+                "random_strength": config.RANDOM_STRENGTH,
+                "bagging_temperature": config.BAGGING_TEMPERATURE,
+                "auto_class_weights": config.AUTO_CLASS_WEIGHTS,
+                "random_state": config.RANDOM_SEED,
+                "verbose": config.VERBOSE,
+                "thread_count": config.THREADS_COUNT
+            }
+
+            self.model = CatBoostClassifier(**params)
+
             logger.info("Модель создана")
 
         with mlflow.start_run(run_name="Финальное обучение"):
@@ -147,7 +153,7 @@ class TrainModel:
                 }
             )
 
-            y_proba = self.model.predict_proba(X_test)[:, 1]
+            y_proba = self.model.predict_proba(X_test)[:,1]
             y_prediction = (y_proba > config.THRESHOLD).astype(int)
 
             roc_auc = roc_auc_score(y_test, y_proba)
@@ -171,6 +177,8 @@ class TrainModel:
                        "cv_roc_auc_mean": cv_score.mean(),
                        "cv_roc_auc_std": cv_score.std()}
 
+            mlflow.log_metrics(metrics)
+
             logger.info("Модель полностью обучена:")
 
             for fold_idx, fold_score in enumerate(cv_score):
@@ -191,12 +199,14 @@ class TrainModel:
 
             input_expl = X_train.head(5)
             signature = infer_signature(input_expl, self.model.predict_proba(input_expl)[:, 1])
+            model_name = config.MODEL_NAME
 
             mlflow.catboost.log_model(
                 cb_model=self.model,
                 name="model",
                 signature=signature,
-                input_example=input_expl
+                input_example=input_expl,
+                registered_model_name=model_name
             )
 
             mlflow.log_dict(
@@ -205,6 +215,31 @@ class TrainModel:
                     "cat_features": config.CAT_FEATURES
                 },
                 "features/features.json"
+            )
+
+            client = MlflowClient()
+
+            versions = client.search_model_versions(f"name = '{model_name}'")
+            current_version = max(versions, key=lambda v: int(v.version))
+
+            client.set_model_version_tag(
+                name=model_name,
+                version=current_version.version,
+                key="status",
+                value="candidate"
+            )
+
+            client.set_model_version_tag(
+                name=model_name,
+                version=current_version.version,
+                key="threshold",
+                value=str(config.THRESHOLD)
+            )
+
+            client.set_registered_model_alias(
+                name=model_name,
+                version=current_version.version,
+                alias="candidate"
             )
 
             self.metrics = metrics
@@ -216,7 +251,7 @@ class TrainModel:
             raise ValueError("Модель не обучена")
 
         y_proba = self.predict_proba(df)
-        y_predict = (y_proba > config.THREASHOLD).astype(int)
+        y_predict = (y_proba > config.THRESHOLD).astype(int)
 
         return y_predict
 
@@ -226,7 +261,7 @@ class TrainModel:
             logger.warning("Модель не обучена")
             raise ValueError("Модель не обучена")
 
-        X = self.feature.create_feature(df)
+        X = self.feature_builder.build(df)
 
         y_proba = self.model.predict_proba(X)[:,1]
 
