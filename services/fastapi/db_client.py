@@ -27,9 +27,13 @@ class DBClient:
 
     def test_connection(self) -> bool:
         logger.info("Тест присоединения...")
-        with self.engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
-        return True
+        try:
+            with self.engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            return True
+        except Exception as e:
+            logger.exception(f"Ошибка присоединения БД: {e}")
+            return False
 
     def load_table(self, table_name: str) -> DataFrame:
         logger.info("Получение таблицы")
@@ -39,7 +43,6 @@ class DBClient:
     def save_predictions(self, df: DataFrame, table_name: str = "Predictions") -> None:
         logger.info("Сохранение предсказаний")
         df.to_sql(table_name, self.engine, if_exists="append", index=False)
-
 
 if __name__ == "__main__":
     db = DBClient()

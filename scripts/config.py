@@ -21,11 +21,12 @@ class Config(BaseModel):
                                     'StreamingMovies']
 
     STUDY_NAME: str = "CatBoost-model"
+    MODEL_NAME: str = "CatBoost-model"
 
     THRESHOLD: float = 0.6
 
     RANDOM_SEED: int = 42
-    THREADS_COUNT: int = -1
+    THREADS_COUNT: int = 1
     LEARNING_RATE: float = 0.001
     BAGGING_TEMPERATURE: float = 1.0
     MODEL_ITERATIONS: int = 100
