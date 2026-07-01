@@ -1,12 +1,18 @@
 import logging
 from datetime import datetime
+
 from typing import List
 
 import pandas as pd
+from celery.result import AsyncResult
 from fastapi import APIRouter, Request, HTTPException
 
 from services.fastapi.schemas import CustomerFeatures, PredictionResponse, BatchPredictionResponse
 from shared.predict import Predictor
+from shared.utils.utils import get_risk_level
+
+from services.celery.tasks import hard_batch_predict_task
+from services.celery.celery_app import app as celery_app
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +70,53 @@ async def batch_predict(
         )
 
 @router.post("/hard_predict")
-async def hard_predict():
-    pass
+async def hard_predict(
+        customers: List[CustomerFeatures],
+        request: Request
+):
+    try:
+        logger.info("Выполнение предсказания")
+        customers_data = [c.model_dump() for c in customers]
+
+        task = hard_batch_predict_task.delay(customers_data)
+        logger.info("Предсказание выполнено")
+
+        response = {
+            "task_id": task.id,
+            "status": task.status,
+            "message": "Предсказание в фоне началось",
+            "count": len(customers_data),
+        }
+
+        logger.info(response)
+
+        return response
+
+    except Exception as e:
+        logger.exception(f"Ошибка предсказания: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Prediction failed"
+        )
+
+@router.get("/task/{task_id}")
+async def get_task_results(task_id: str):
+    logger.info("Получение результатов выполнения таска")
+    task = AsyncResult(task_id, app=celery_app)
+
+    response = {
+        "task_id": task_id,
+        "status": task.status,
+    }
+
+    if task.successful():
+        logger.info("Таск выполнен")
+        response["result"] = task.result
+    elif task.failed():
+        logger.warning("Таск упал!")
+        response["error"] = str(task.result)
+
+    return response
 
 def make_batch_prediction(
         predictor: Predictor,
@@ -97,7 +148,7 @@ def make_batch_prediction(
 def make_prediction(predictor: Predictor, customer_features: dict) -> dict:
     df = pd.DataFrame([customer_features])
 
-    probability = predictor.predict_proba(df)[0]
+    probability = float(predictor.predict_proba(df)[0])
     prediction = "Churn" if probability > predictor.threshold else "Stay"
 
     risk = get_risk_level(probability)
@@ -110,13 +161,4 @@ def make_prediction(predictor: Predictor, customer_features: dict) -> dict:
         "prediction": prediction,
     }
 
-def get_risk_level(probability: float) -> str:
 
-    if probability > 0.9:
-        return "Critical"
-    elif probability > 0.8:
-        return "High"
-    elif probability > 0.6:
-        return "Medium"
-
-    return "Low"
