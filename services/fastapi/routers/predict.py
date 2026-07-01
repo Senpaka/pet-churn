@@ -11,7 +11,7 @@ from services.fastapi.schemas import CustomerFeatures, PredictionResponse, Batch
 from shared.predict import Predictor
 from shared.utils.utils import get_risk_level
 
-from services.celery.tasks import hard_batch_predict_task
+from services.celery.tasks import hard_batch_predict_task, predict_from_db_task
 from services.celery.celery_app import app as celery_app
 
 logger = logging.getLogger(__name__)
@@ -69,26 +69,24 @@ async def batch_predict(
             detail="Prediction failed"
         )
 
-@router.post("/hard_predict")
-async def hard_predict(
-        customers: List[CustomerFeatures],
-        request: Request
-):
+@router.post("/predict_from_db")
+async def predict_from_db() -> dict:
     try:
-        logger.info("Выполнение предсказания")
-        customers_data = [c.model_dump() for c in customers]
-
-        task = hard_batch_predict_task.delay(customers_data)
+        logger.info("Выполнение предсказания для базы данных")
+        task = predict_from_db_task.delay()
         logger.info("Предсказание выполнено")
 
         response = {
-            "task_id": task.id,
+            "task_id": task.task_id,
             "status": task.status,
-            "message": "Предсказание в фоне началось",
-            "count": len(customers_data),
         }
 
-        logger.info(response)
+        if task.successful():
+            logger.info("Таск выполнен успешно")
+            response["result"] = task.result
+        elif task.failed():
+            logger.info("Таск упал")
+            response["error"] = str(task.result)
 
         return response
 
@@ -100,7 +98,7 @@ async def hard_predict(
         )
 
 @router.get("/task/{task_id}")
-async def get_task_results(task_id: str):
+async def get_task_results(task_id: str) -> dict:
     logger.info("Получение результатов выполнения таска")
     task = AsyncResult(task_id, app=celery_app)
 
