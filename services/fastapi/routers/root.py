@@ -20,5 +20,7 @@ def root():
         "Документация (redoc)": "/redoc",
         "Проверка здоровья": "/health",
         "Проверка БД": "/health/ping",
-        "Предсказание": "/model/predict"
+        "Предсказание": "/model/predict",
+        "Batch-предсказание": "/model/batch_predict",
+        "Тяжелые предсказания": "/model/hard_predict",
     }

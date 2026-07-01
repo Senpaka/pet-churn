@@ -15,7 +15,7 @@ router = APIRouter(
     tags=["model"],
 )
 
-@router.post("/predict", tags=["predict"], response_model=PredictionResponse)
+@router.post("/predict", response_model=PredictionResponse)
 async def predict(
         customer: CustomerFeatures,
         request: Request
@@ -37,8 +37,8 @@ async def predict(
         )
 
 
-@router.post("/predict_batch", tags=["predict"], response_model=BatchPredictionResponse)
-async def predict_batch(
+@router.post("/batch_predict", response_model=BatchPredictionResponse)
+async def batch_predict(
         customers: List[CustomerFeatures],
         request: Request
 ):
@@ -63,7 +63,7 @@ async def predict_batch(
             detail="Prediction failed"
         )
 
-@router.post("/hard_predict", tags=["predict"])
+@router.post("/hard_predict")
 async def hard_predict():
     pass
 
