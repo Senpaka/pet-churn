@@ -16,5 +16,22 @@ fastapi-run:
 	--host $(FASTAPI_HOST) \
 	--port $(FASTAPI_PORT)
 
+celery-cpu-run:
+	@echo "Запуск celery для тяжелых задач"
+	celery -A services.celery.celery_app:app worker \
+	-Q cpu_worker \
+	--hostname=@cpu_worker \
+	--concurrency=$(CELERY_CPU_CONCURRENCY) \
+	--prefetch-multiplier=$(CELERY_CPU_MULTIPLIER) \
+	--loglevel=info
+
+celery-io-run:
+	@echo "Запуск celery для легкиз задач i/o"
+	celery -A services.celery.celery_app:app worker \
+	-Q io_worker \
+	--hostname=@io_worker \
+	--concurrency=$(CELERY_IO_CONCURRENCY) \
+	--prefetch-multiplier=$(CELERY_IO_MULTIPLIER) \
+	--loglevel=info
 
 

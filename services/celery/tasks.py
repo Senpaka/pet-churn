@@ -24,7 +24,7 @@ def get_worker_predictor():
 
     return _predictor
 
-@app.task(name="hard_batch_predict_task")
+@app.task(name="hard_batch_predict_task", queue="cpu_worker")
 def hard_batch_predict_task(customers: List[dict]):
 
     predictor = get_worker_predictor()
