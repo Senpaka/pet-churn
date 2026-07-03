@@ -5,6 +5,7 @@
 - Pydantic
 - SQLAlchemy
 - PostgreSQL
+- Alembic
 
 ### Async processing:
 - Celery

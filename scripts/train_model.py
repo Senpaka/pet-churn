@@ -25,6 +25,12 @@ class TrainModel:
     """
 
     def __init__(self):
+        """
+        Инициалиализирует объект TrainModel
+
+        Устанавливает базовые настройки mlflow
+        """
+
         mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
         mlflow.set_experiment(settings.mlflow_experiment_name)
 
@@ -40,7 +46,14 @@ class TrainModel:
         Обучает модель с использованием подбора гиперпараметров (Optuna)
         Так же происходи логирование метрик и данных модели в mlflow
 
-        :param df: датасет
+        Процесс обучения:
+        1. Проверка входных данных
+        2. Разбиение на Train/test
+        3. Подбор гиперпараметров через Optuna
+        4. Обучение финальной модели
+        5. Оценка метрик и логирование в MLFlow
+
+        :param df: датасет для обучения
         """
 
         if df.empty:
