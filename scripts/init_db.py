@@ -7,23 +7,15 @@ import dotenv
 from pathlib import Path
 from sqlalchemy import create_engine, text, Engine
 
-BASE_DIR = Path(__file__).resolve().parents[1]
-dotenv.load_dotenv(BASE_DIR / ".env")
-
+from core.logging_config import setup_logging
+from core.settings import settings
 import logging
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler(BASE_DIR / "logs/bd.log")
-    ]
-)
+setup_logging("bd.log")
 logger = logging.getLogger(__name__)
 
 def get_engine() -> Engine:
-    db_url = os.getenv("DATABASE_URL")
+    db_url = settings.database_url
 
     if not db_url:
         raise ValueError("БД не найдена")

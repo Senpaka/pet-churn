@@ -1,4 +1,3 @@
-import sys
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -9,23 +8,14 @@ import services.fastapi.routers.root as root
 import services.fastapi.routers.predict as predict
 import services.fastapi.routers.health as health
 
-from pathlib import Path
-
 from services.fastapi.middleware import RequestLoggingMiddleware
 from services.fastapi.model_loader import load_predictor
 
-BASE_DIR = Path(__file__).resolve().parents[2]
+from core.logging_config import setup_logging
 
 import logging
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler(BASE_DIR / "logs/fastapi.log", encoding="utf-8")
-    ]
-)
+setup_logging("fastapi.log")
 logger = logging.getLogger(__name__)
 
 @asynccontextmanager

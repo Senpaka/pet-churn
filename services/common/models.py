@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Double, Float, DateTime, func
 
 from services.common.db import Base
 
+
 class Customer(Base):
     __tablename__ = "customer"
     customerID = Column(String(50), primary_key=True)

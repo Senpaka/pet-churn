@@ -1,17 +1,12 @@
 from celery import Celery
-import os
-import dotenv
-from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parents[2]
-dotenv.load_dotenv(BASE_DIR / ".env")
+from core.settings import settings
 
-print(BASE_DIR)
 
 app = Celery(
     "BackGround tasks",
-    broker=os.getenv("CELERY_BROKER_URL"),
-    backend=os.getenv("CELERY_BACKEND_URL"),
+    broker=settings.celery_broker_url,
+    backend=settings.celery_backend_url,
 )
 
 app.conf.update(

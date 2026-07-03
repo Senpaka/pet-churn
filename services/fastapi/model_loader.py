@@ -1,28 +1,21 @@
-import os
-
 import mlflow
 from mlflow import MlflowClient
 
 from shared.predict import Predictor
-
-from pathlib import Path
-import dotenv
+from core.settings import settings
 
 import logging
 
 logger = logging.getLogger(__name__)
 
-BASE_DIR = Path(__file__).resolve().parents[1]
-dotenv.load_dotenv(BASE_DIR / ".env")
-
 def load_predictor() -> Predictor:
 
     logger.info(f"Загрузка Predictor")
 
-    tracking_uri = os.getenv("MLFLOW_TRACKING_URI")
+    tracking_uri = settings.mlflow_tracking_uri
 
-    model_name = os.getenv("MODEL_NAME")
-    model_alias = os.getenv("MODEL_ALIAS")
+    model_name = settings.model_name
+    model_alias = settings.model_alias
 
     mlflow.set_tracking_uri(tracking_uri)
 

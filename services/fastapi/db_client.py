@@ -1,23 +1,17 @@
-import os
-import dotenv
-from pathlib import Path
-
 import pandas as pd
 from pandas import DataFrame
 from sqlalchemy import create_engine, text
 import logging
 
+from core.settings import settings
+
 logger = logging.getLogger(__name__)
-
-BASE_DIR = Path(__file__).resolve().parents[2]
-dotenv.load_dotenv(BASE_DIR / ".env")
-
 
 class DBClient:
 
     def __init__(self, db_uri: str | None = None):
         logger.info("Присоединение к базу данных")
-        self.db_url = db_uri or os.getenv("DATABASE_URL")
+        self.db_url = db_uri or settings.database_url
         if not self.db_url:
             logger.warning("Ошибка присоединения, не указан uri")
             raise ValueError("База данных не задана")

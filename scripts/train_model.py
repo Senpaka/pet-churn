@@ -1,5 +1,3 @@
-import sys
-
 from mlflow import MlflowClient
 from mlflow.models import infer_signature
 from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
@@ -9,35 +7,23 @@ import mlflow.catboost
 import mlflow
 import pandas as pd
 import numpy as np
-import os
 import optuna
 
 from shared.features import FeatureBuilder
 from scripts.config import config
-
-from pathlib import Path
-import dotenv
-
-BASE_DIR = Path(__file__).resolve().parents[1]
-dotenv.load_dotenv(BASE_DIR / ".env")
+from core.logging_config import setup_logging
+from core.settings import settings
 
 import logging
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler(BASE_DIR / "logs/train.log")
-    ]
-)
+setup_logging("train.log")
 logger = logging.getLogger(__name__)
 
 class TrainModel:
     def __init__(self):
 
-        mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI"))
-        mlflow.set_experiment(os.getenv("MLFLOW_EXPERIMENT_NAME"))
+        mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
+        mlflow.set_experiment(settings.mlflow_experiment_name)
 
         self.model = None
         self.metrics = None
@@ -65,7 +51,7 @@ class TrainModel:
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=config.RANDOM_SEED, stratify=y)
 
-        storage = optuna.storages.RDBStorage(os.getenv("OPTUNA_DATABASE_URI"))
+        storage = optuna.storages.RDBStorage(settings.optuna_database_uri)
 
         logger.info("Подбор параметров оптуной...")
 

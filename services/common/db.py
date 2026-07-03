@@ -1,15 +1,10 @@
-
-import os
-import dotenv
-from pathlib import Path
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-BASE_DIR = Path(__file__).resolve().parents[2]
-dotenv.load_dotenv(str(BASE_DIR / '.env'))
+from core.settings import settings
 
-DB_URL = os.getenv("DATABASE_URL")
+
+DB_URL = settings.database_url
 
 if not DB_URL:
     raise ValueError("База данных не найдена")

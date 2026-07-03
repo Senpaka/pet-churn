@@ -1,5 +1,4 @@
 import datetime
-import time
 from typing import List
 
 import pandas as pd
@@ -10,6 +9,7 @@ from shared.utils.utils import get_risk_level
 from services.fastapi.model_loader import load_predictor
 
 import logging
+
 
 logger = logging.getLogger(__name__)
 
