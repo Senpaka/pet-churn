@@ -20,6 +20,11 @@ class DBClient:
 
 
     def test_connection(self) -> bool:
+        """
+        Тест соединения с бд
+
+        :return: true/false
+        """
         logger.info("Тест присоединения...")
         try:
             with self.engine.connect() as conn:

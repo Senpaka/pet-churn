@@ -4,6 +4,11 @@ import sys
 import core.paths as paths
 
 def setup_logging(log_name: str = "tmp.log") -> None:
+    """
+    Установка главного логгера
+
+    :param log_name: имя файла лога
+    """
 
     logging.basicConfig(
         level=logging.DEBUG,

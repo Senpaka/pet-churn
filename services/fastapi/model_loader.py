@@ -9,6 +9,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 def load_predictor() -> Predictor:
+    """
+    Загрузчик предиктора (Predictor)
+
+    :return: Predictor
+    """
 
     logger.info(f"Загрузка Predictor")
 

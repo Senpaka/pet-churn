@@ -8,6 +8,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware для логгирования FastAPI запросов
+    """
+
     async def dispatch(self, request: Request, call_next):
         request_id = str(uuid.uuid4())
         start_time = time.perf_counter()

@@ -15,6 +15,11 @@ setup_logging("bd.log")
 logger = logging.getLogger(__name__)
 
 def get_engine() -> Engine:
+    """
+    Получение движка бд
+
+    :return: движок
+    """
     db_url = settings.database_url
 
     if not db_url:
@@ -23,6 +28,12 @@ def get_engine() -> Engine:
     return create_engine(db_url)
 
 def load_customers(engine: Engine, csv_url: Path) -> None:
+    """
+    Загрузить данные из файла в таблицу пользователей
+
+    :param engine: Движок
+    :param csv_url: Путь до csv файла
+    """
 
     if not csv_url.exists():
         logger.warning(f"csv файл не найден: {csv_url}")
@@ -44,6 +55,12 @@ def load_customers(engine: Engine, csv_url: Path) -> None:
     logger.info("Данные для бд customers успешно загруженны")
 
 def delete_table(engine: Engine, table_name: str) -> None:
+    """
+    Удаление таблицы целиком
+
+    :param engine: Движок
+    :param table_name: Название таблицы
+    """
     with engine.begin() as conn:
         conn.execute(text(f"""
             DROP TABLE IF EXISTS {table_name};

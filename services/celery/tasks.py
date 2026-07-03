@@ -17,6 +17,12 @@ _predictor = None
 _db_client = None
 
 def _get_worker_predictor():
+    """
+    Получение предсказателя (Predictor)
+
+    :return: Predictor
+    """
+
     global _predictor
 
     if _predictor is None:
@@ -27,6 +33,12 @@ def _get_worker_predictor():
     return _predictor
 
 def _get_db_client():
+    """
+    Получение клиента базы данных
+
+    :return: клиент бд (DBClient)
+    """
+
     global _db_client
 
     if _db_client is None:
@@ -38,6 +50,12 @@ def _get_db_client():
 
 @app.task(name="predict_from_db_task", queue="cpu_worker")
 def predict_from_db_task():
+    """
+    Предсказание на всей бд
+    с последущим сохранением в таблицу predictions
+
+    :return: словарь-ответ
+    """
 
     logger.info("Загрузка predictor и db_client")
     predictor = _get_worker_predictor()
@@ -75,38 +93,3 @@ def predict_from_db_task():
         "count": len(df),
         "created_at": created_at
     }
-
-@app.task(name="hard_batch_predict_task", queue="cpu_worker")
-def hard_batch_predict_task(customers: List[dict]):
-
-    predictor = _get_worker_predictor()
-
-    df = pd.DataFrame(customers)
-
-    probabilities = predictor.predict_proba(df)
-
-    predictions = []
-    created_at = datetime.datetime.now().isoformat()
-
-    for customer_feature, probability in zip(customers, probabilities):
-
-        probability = float(probability)
-        prediction = "Churn" if probability > predictor.threshold else "Stay"
-
-        risk = get_risk_level(probability)
-
-        predictions.append({
-            "customer_id": customer_feature.get("customerID"),
-            "risk": risk,
-            "probability": probability,
-            "prediction": prediction,
-            "timestamp": created_at
-        })
-
-    return {
-        "count": len(customers),
-        "predictions": predictions
-    }
-
-
-

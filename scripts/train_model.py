@@ -20,8 +20,11 @@ setup_logging("train.log")
 logger = logging.getLogger(__name__)
 
 class TrainModel:
-    def __init__(self):
+    """
+    Класс для обучения модели CatBoost-Classifier
+    """
 
+    def __init__(self):
         mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
         mlflow.set_experiment(settings.mlflow_experiment_name)
 
@@ -33,6 +36,12 @@ class TrainModel:
         logger.info("TrainModel инициализирован")
 
     def train(self, df: pd.DataFrame) -> None:
+        """
+        Обучает модель с использованием подбора гиперпараметров (Optuna)
+        Так же происходи логирование метрик и данных модели в mlflow
+
+        :param df: датасет
+        """
 
         if df.empty:
             logger.warning("Датафрейм пустой...")
@@ -232,6 +241,13 @@ class TrainModel:
             self.is_train = True
 
     def predict(self, df: pd.DataFrame) -> np.ndarray:
+        """
+        Возвращает предсказание модели (0/1)
+
+        :param df: Датасет
+        :return: numpy массив вероятностей
+        """
+
         if not self.is_train:
             logger.warning("Модель не обучена")
             raise ValueError("Модель не обучена")
@@ -243,6 +259,12 @@ class TrainModel:
 
 
     def predict_proba(self, df: pd.DataFrame) -> np.ndarray:
+        """
+        Возвращает предсказание модели в виде вероятностей (0-1)
+
+        :param df: Датасет
+        :return: numpy массив вероятностей
+        """
         if not self.is_train:
             logger.warning("Модель не обучена")
             raise ValueError("Модель не обучена")
@@ -254,6 +276,14 @@ class TrainModel:
         return y_proba
 
     def objective(self, trial: optuna.trial.Trial, X_train, y_train) -> float:
+        """
+        Метод для подбора гиперпараметоров
+
+        :param trial: Триал
+        :param X_train: Обучающая выборка
+        :param y_train: Обучающая целевая переменная
+        :return: cv_score среднее значение кросс валидации
+        """
 
         params = {
             "iterations": config.MODEL_ITERATIONS,

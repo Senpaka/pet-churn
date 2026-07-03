@@ -4,6 +4,10 @@ from services.common.db import Base
 
 
 class Customer(Base):
+    """
+    Модель клиента
+    """
+
     __tablename__ = "customer"
     customerID = Column(String(50), primary_key=True)
     gender = Column(String(20))
@@ -27,6 +31,10 @@ class Customer(Base):
     TotalCharges = Column(Double)
 
 class Prediction(Base):
+    """
+    Модель предсказаний
+    """
+
     __tablename__ = "predictions"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

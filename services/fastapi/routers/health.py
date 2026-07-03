@@ -17,6 +17,12 @@ router = APIRouter(
 
 @router.get("/", response_model=HealthResponse)
 async def health():
+    """
+    Роут для health-check
+
+    :return: HealthResponse
+    """
+
     logger.info(f"Проверка здоровья")
     return HealthResponse(
         status=200,
@@ -27,6 +33,12 @@ async def health():
 async def ping(
         db_client: DBClient = Depends(get_db_client)
 ):
+    """
+    Проверка подсоединения бд
+
+    :param db_client: клиент бд
+    :return: DataBaseResponse
+    """
     logger.info("Проверка присоединения бд")
     if db_client.test_connection():
         logger.info("БД присоединена")

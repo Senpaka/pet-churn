@@ -2,6 +2,9 @@ from celery import Celery
 
 from core.settings import settings
 
+"""
+Настройка Celery 
+"""
 
 app = Celery(
     "BackGround tasks",

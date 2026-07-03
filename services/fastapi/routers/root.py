@@ -11,6 +11,10 @@ router = APIRouter(
 
 @router.get("/", tags=["root"])
 def root():
+    """
+    Информация про API
+    """
+
     logger.info("Информация об API")
     return {
         "Версия": "1.0.0",

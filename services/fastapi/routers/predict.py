@@ -11,7 +11,7 @@ from services.fastapi.schemas import CustomerFeatures, PredictionResponse, Batch
 from shared.predict import Predictor
 from shared.utils.utils import get_risk_level
 
-from services.celery.tasks import hard_batch_predict_task, predict_from_db_task
+from services.celery.tasks import predict_from_db_task
 from services.celery.celery_app import app as celery_app
 
 logger = logging.getLogger(__name__)
@@ -26,6 +26,14 @@ async def predict(
         customer: CustomerFeatures,
         request: Request
 ):
+    """
+    Предсказание на json объекте
+
+    :param customer: Схема клиента
+    :param request: API запрос
+    :return: PredictionResponse
+    """
+
     try:
         logger.info("Выполнение предсказания")
         predictor = request.app.state.predictor
@@ -48,6 +56,14 @@ async def batch_predict(
         customers: List[CustomerFeatures],
         request: Request
 ):
+    """
+    Предсказание на json массиве
+
+    :param customers: Список схем клиентов
+    :param request: API запрос
+    :return: BatchPredictionResponse
+    """
+
     try:
         logger.info("Выполнение batch-предсказания")
         predictor = request.app.state.predictor
@@ -71,6 +87,12 @@ async def batch_predict(
 
 @router.post("/predict_from_db")
 async def predict_from_db() -> dict:
+    """
+    Предсказание на целой бд
+
+    :return: Словарь-ответ
+    """
+
     try:
         logger.info("Выполнение предсказания для базы данных")
         task = predict_from_db_task.delay()
@@ -99,6 +121,13 @@ async def predict_from_db() -> dict:
 
 @router.get("/task/{task_id}")
 async def get_task_results(task_id: str) -> dict:
+    """
+    Получить результаты выполнения celery таска в фоне
+
+    :param task_id: индентификатор таска
+    :return: словарь-ответ
+    """
+
     logger.info("Получение результатов выполнения таска")
     task = AsyncResult(task_id, app=celery_app)
 
@@ -120,6 +149,13 @@ def make_batch_prediction(
         predictor: Predictor,
         customer_features: List[dict]
 ) -> List[PredictionResponse]:
+    """
+    Вспомогатлельный метод для предсказания на батче
+
+    :param predictor: предсказатель
+    :param customer_features: список словарей с фичами
+    :return: List[PredictionResponse]
+    """
 
     df = pd.DataFrame(customer_features)
 
@@ -144,6 +180,14 @@ def make_batch_prediction(
     return responses
 
 def make_prediction(predictor: Predictor, customer_features: dict) -> dict:
+    """
+    Вспомогательный метод для предсказания
+
+    :param predictor: Предсказатель
+    :param customer_features: Словарь с фичами
+    :return: Словарь с данными предсказания
+    """
+
     df = pd.DataFrame([customer_features])
 
     probability = float(predictor.predict_proba(df)[0])

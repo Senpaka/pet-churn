@@ -10,11 +10,23 @@ _to_drop = config.TO_DROP
 _features = config.ALL_FEATURES
 
 class FeatureBuilder:
+    """
+    Класс FeatureBuilder
+
+    содержит метод build для сборки фиче (удаления/изменения/создания)
+    """
 
     def __init__(self):
         pass
 
     def build(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Создает новые или изменяет фичи
+
+        :param df: Датасет
+        :return: Новый датасет
+        """
+
         df = df.copy()
 
         if not set(_features).issubset(set(df.columns)):
