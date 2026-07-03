@@ -22,47 +22,6 @@ def get_engine() -> Engine:
 
     return create_engine(db_url)
 
-def create_table(engine: Engine) -> None:
-
-    with engine.begin() as conn:
-        conn.execute(text("""
-            CREATE TABLE IF NOT EXISTS customers (
-                "customerID" VARCHAR(50) PRIMARY KEY,
-                "gender" VARCHAR(20),
-                "SeniorCitizen" INTEGER,
-                "Partner" VARCHAR(10),
-                "Dependents" VARCHAR(10),
-                "tenure" INTEGER,
-                "PhoneService" VARCHAR(30),
-                "MultipleLines" VARCHAR(30),
-                "InternetService" VARCHAR(30),
-                "OnlineSecurity" VARCHAR(30),
-                "OnlineBackup" VARCHAR(30),
-                "DeviceProtection" VARCHAR(30),
-                "TechSupport" VARCHAR(30),
-                "StreamingTV" VARCHAR(30),
-                "StreamingMovies" VARCHAR(30),
-                "Contract" VARCHAR(50),
-                "PaperlessBilling" VARCHAR(10),
-                "PaymentMethod" VARCHAR(50),
-                "MonthlyCharges" DOUBLE PRECISION,
-                "TotalCharges" DOUBLE PRECISION
-                );
-        """))
-
-        conn.execute(text("""
-            CREATE TABLE IF NOT EXISTS predictions (
-                id SERIAL PRIMARY KEY,
-                customer_id VARCHAR(10) NOT NULL,
-                risk VARCHAR(10) NOT NULL,
-                probability FLOAT NOT NULL,
-                prediction VARCHAR(6) NOT NULL,
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-        """))
-
-        logger.info("Таблицы успешно созданы или уже существовали")
-
 def load_customers(engine: Engine, csv_url: Path) -> None:
 
     if not csv_url.exists():
@@ -93,7 +52,6 @@ def delete_table(engine: Engine, table_name: str) -> None:
 if __name__ == "__main__":
 
     engine = get_engine()
-    create_table(engine)
 
     parser = argparse.ArgumentParser("Утилита для управления бд")
 
