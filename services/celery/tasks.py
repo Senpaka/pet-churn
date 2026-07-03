@@ -50,6 +50,7 @@ def predict_from_db_task():
     probabilities = predictor.predict_proba(df)
     predictions = []
     created_at = datetime.datetime.now().isoformat()
+    threshold = predictor.threshold
 
     for idx, (_, row) in enumerate(df.iterrows()):
 
@@ -59,8 +60,9 @@ def predict_from_db_task():
             "customer_id": row.get("customerID"),
             "risk": get_risk_level(probability),
             "probability": probability,
-            "prediction": "Churn" if probability > predictor.threshold else "Stay",
-            "timestamp": created_at
+            "prediction": "Churn" if probability > threshold else "Stay",
+            "timestamp": created_at,
+            "threshold": threshold
         })
 
     predictions_df = pd.DataFrame(predictions)
@@ -71,7 +73,7 @@ def predict_from_db_task():
     return {
         "status": "saved to db",
         "count": len(df),
-        "timestamp": created_at
+        "created_at": created_at
     }
 
 @app.task(name="hard_batch_predict_task", queue="cpu_worker")

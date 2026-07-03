@@ -24,10 +24,10 @@
 ### Логирование:
  В проекте выполнено логирование в файл `.log` и с помощью mlflow
 ### makefile:
- `make mlflow-run` - поднимает сервер с mlflow для отслеживания 
- `make fastapi-run` - поднимает сервер с fastapi 
- `make celery-cpu-run` - запуск celery для тяжелых задач 
- `make celery-io-run` - Запуск celery для легкиз задач i/o 
+ `make mlflow-run` - поднимает сервер с mlflow для отслеживания  
+ `make fastapi-run` - поднимает сервер с fastapi  
+ `make celery-cpu-run` - запуск celery для тяжелых задач  
+ `make celery-io-run` - Запуск celery для легкиз задач i/o  
 ### Обучение модели:
 - Реализовано обучение модели с подбором гиперпарамитров с использованием `optuna`
 - Логирование в mlflow и файл 
