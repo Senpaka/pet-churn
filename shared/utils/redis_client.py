@@ -1,19 +1,15 @@
 import redis
 import json
-import dotenv
-from pathlib import Path
-import os
 import logging
 
-logger = logging.getLogger(__name__)
+from core.settings import  settings
 
-BASE_DIR = Path(__file__).resolve().parents[2]
-dotenv.load_dotenv(BASE_DIR / ".env")
+logger = logging.getLogger(__name__)
 
 class RedisClient:
     def __init__(self, redis_uri: str | None = None):
         logger.info("Присоединение к Redis")
-        self.redis_uri = redis_uri or os.getenv("REDIS_URI")
+        self.redis_uri = redis_uri or settings.redis_uri
         if not self.redis_uri:
             logger.warning("Ошибка присоединения, не указан uri")
             raise ValueError("Redis uri не указан")

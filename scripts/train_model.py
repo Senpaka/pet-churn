@@ -1,5 +1,3 @@
-import sys
-
 from mlflow import MlflowClient
 from mlflow.models import infer_signature
 from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
@@ -9,35 +7,32 @@ import mlflow.catboost
 import mlflow
 import pandas as pd
 import numpy as np
-import os
 import optuna
 
 from shared.features import FeatureBuilder
 from scripts.config import config
-
-from pathlib import Path
-import dotenv
-
-BASE_DIR = Path(__file__).resolve().parents[1]
-dotenv.load_dotenv(BASE_DIR / ".env")
+from core.logging_config import setup_logging
+from core.settings import settings
 
 import logging
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler(BASE_DIR / "logs/train.log")
-    ]
-)
+setup_logging("train.log")
 logger = logging.getLogger(__name__)
 
 class TrainModel:
-    def __init__(self):
+    """
+    Класс для обучения модели CatBoost-Classifier
+    """
 
-        mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI"))
-        mlflow.set_experiment(os.getenv("MLFLOW_EXPERIMENT_NAME"))
+    def __init__(self):
+        """
+        Инициалиализирует объект TrainModel
+
+        Устанавливает базовые настройки mlflow
+        """
+
+        mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
+        mlflow.set_experiment(settings.mlflow_experiment_name)
 
         self.model = None
         self.metrics = None
@@ -47,6 +42,19 @@ class TrainModel:
         logger.info("TrainModel инициализирован")
 
     def train(self, df: pd.DataFrame) -> None:
+        """
+        Обучает модель с использованием подбора гиперпараметров (Optuna)
+        Так же происходи логирование метрик и данных модели в mlflow
+
+        Процесс обучения:
+        1. Проверка входных данных
+        2. Разбиение на Train/test
+        3. Подбор гиперпараметров через Optuna
+        4. Обучение финальной модели
+        5. Оценка метрик и логирование в MLFlow
+
+        :param df: датасет для обучения
+        """
 
         if df.empty:
             logger.warning("Датафрейм пустой...")
@@ -65,7 +73,7 @@ class TrainModel:
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=config.RANDOM_SEED, stratify=y)
 
-        storage = optuna.storages.RDBStorage(os.getenv("OPTUNA_DATABASE_URI"))
+        storage = optuna.storages.RDBStorage(settings.optuna_database_uri)
 
         logger.info("Подбор параметров оптуной...")
 
@@ -246,6 +254,13 @@ class TrainModel:
             self.is_train = True
 
     def predict(self, df: pd.DataFrame) -> np.ndarray:
+        """
+        Возвращает предсказание модели (0/1)
+
+        :param df: Датасет
+        :return: numpy массив вероятностей
+        """
+
         if not self.is_train:
             logger.warning("Модель не обучена")
             raise ValueError("Модель не обучена")
@@ -257,6 +272,12 @@ class TrainModel:
 
 
     def predict_proba(self, df: pd.DataFrame) -> np.ndarray:
+        """
+        Возвращает предсказание модели в виде вероятностей (0-1)
+
+        :param df: Датасет
+        :return: numpy массив вероятностей
+        """
         if not self.is_train:
             logger.warning("Модель не обучена")
             raise ValueError("Модель не обучена")
@@ -268,6 +289,14 @@ class TrainModel:
         return y_proba
 
     def objective(self, trial: optuna.trial.Trial, X_train, y_train) -> float:
+        """
+        Метод для подбора гиперпараметоров
+
+        :param trial: Триал
+        :param X_train: Обучающая выборка
+        :param y_train: Обучающая целевая переменная
+        :return: cv_score среднее значение кросс валидации
+        """
 
         params = {
             "iterations": config.MODEL_ITERATIONS,
