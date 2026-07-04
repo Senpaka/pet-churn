@@ -8,10 +8,15 @@ from alembic import context
 
 from services.common.db import Base
 from core.settings import settings
+from services.common import models
+
+from pathlib import Path
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+BASE_DIR = Path(__file__).resolve().parents[1]
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
