@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 
 from services.fastapi.dependencies import get_db_client
 from services.fastapi.schemas import HealthResponse, DataBaseResponse
-from services.fastapi.db_client import DBClient
+from shared.db_client import DBClient
 
 import logging
 

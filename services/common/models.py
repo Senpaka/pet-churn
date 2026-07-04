@@ -8,7 +8,7 @@ class Customer(Base):
     Модель клиента
     """
 
-    __tablename__ = "customer"
+    __tablename__ = "customers"
     customerID = Column(String(50), primary_key=True)
     gender = Column(String(20))
     SeniorCitizen = Column(Integer)

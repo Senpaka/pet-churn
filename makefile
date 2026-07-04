@@ -1,6 +1,8 @@
 include .env
 export
 
+ALEMBIC_REVISION ?= base
+
 mlflow-run:
 	@echo "Запуск mlflow"
 	mlflow server \
@@ -34,4 +36,14 @@ celery-io-run:
 	--prefetch-multiplier=$(CELERY_IO_MULTIPLIER) \
 	--loglevel=info
 
+db-migrations:
+	@echo "Применение миграций до head"
+	alembic upgrade head
 
+db-downgrade:
+	@echo "Откат миграций до $(ALEMBIC_REVISION)"
+	alembic downgrade $(ALEMBIC_REVISION)
+
+db-revision:
+	@echo "Создание новой ревизии"
+	alembic revision --autogenerate -m "$(m)"

@@ -1,12 +1,11 @@
 import datetime
-from typing import List
 
 import pandas as pd
 
 from services.celery.celery_app import app
-from services.fastapi.db_client import DBClient
+from shared.db_client import DBClient
+from shared.model_loader import load_predictor
 from shared.utils.utils import get_risk_level
-from services.fastapi.model_loader import load_predictor
 
 import logging
 

@@ -9,7 +9,7 @@ import services.fastapi.routers.predict as predict
 import services.fastapi.routers.health as health
 
 from services.fastapi.middleware import RequestLoggingMiddleware
-from services.fastapi.model_loader import load_predictor
+from shared.model_loader import load_predictor
 
 from core.logging_config import setup_logging
 
