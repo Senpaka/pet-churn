@@ -3,7 +3,7 @@ import datetime
 import pandas as pd
 
 from services.celery.celery_app import app
-from shared.db_client import DBClient
+from services.common.db_client import DBClient
 from shared.model_loader import load_predictor
 from shared.utils.utils import get_risk_level
 
