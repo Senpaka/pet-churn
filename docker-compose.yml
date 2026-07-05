@@ -1,0 +1,121 @@
+
+services:
+  postgres:
+    image: postgres:15.18-trixie
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: default_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  redis:
+    image: redis:8.8.0-trixie
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+
+  mlflow:
+    build:
+      context: .
+      dockerfile: services/mlflow/Dockerfile
+    container_name: mlflow
+    restart: unless-stopped
+    ports:
+      - '5001:5000'
+    depends_on:
+      - postgres
+    env_file:
+      - .env.docker
+    volumes:
+      - mlflow_artifacts:/app/artifacts/mlflow
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: services/celery/Dockerfile
+    container_name: celery_worker
+    depends_on:
+      - postgres
+      - redis
+      - mlflow
+    env_file:
+      - .env.docker
+    volumes:
+      - mlflow_artifacts:/app/artifacts/mlflow
+      - .logs:/app/logs
+
+  fastapi:
+    build:
+      context: .
+      dockerfile: services/fastapi/Dockerfile
+    container_name: fastapi
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+      - mlflow
+      - celery-worker
+    env_file:
+      - .env.docker
+    volumes:
+      - mlflow_artifacts:/app/artifacts/mlflow
+      - .logs:/app/logs
+
+  trainer:
+    build:
+      context: .
+      dockerfile: services/train/Dockerfile
+    depends_on:
+      - mlflow
+      - postgres
+    env_file:
+      - .env.docker
+    volumes:
+      - mlflow_artifacts:/app/artifacts/mlflow
+      - ./datasets:/app/datasets
+      - ./logs:/app/logs
+    profiles:
+      - train
+
+  db-migrate:
+    build:
+      context: .
+      dockerfile: services/db_migrations/Dockerfile
+    depends_on:
+      - postgres
+    env_file:
+      - .env.docker
+    profiles:
+      - db
+    command: ["alembic", "upgrade", "head"]
+
+  db-seed:
+    build:
+      context: .
+      dockerfile: services/db_migrations/Dockerfile
+    depends_on:
+      - postgres
+    env_file:
+      - .env.docker
+    volumes:
+      - ./datasets:/app/datasets
+    profiles:
+      - db
+    command: ["python3", "-m", "scripts.init_db", "--load_customers", "/app/datasets/dataset.csv"]
+
+volumes:
+  postgres_data:
+  redis_data:
+  mlflow_artifacts:
