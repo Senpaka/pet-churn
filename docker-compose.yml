@@ -52,7 +52,7 @@ services:
       - .env.docker
     volumes:
       - mlflow_artifacts:/app/artifacts/mlflow
-      - .logs:/app/logs
+      - ./logs:/app/logs
 
   fastapi:
     build:
@@ -71,7 +71,7 @@ services:
       - .env.docker
     volumes:
       - mlflow_artifacts:/app/artifacts/mlflow
-      - .logs:/app/logs
+      - ./logs:/app/logs
 
   trainer:
     build:
