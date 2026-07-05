@@ -2,7 +2,7 @@ import redis
 import json
 import logging
 
-from core.settings import  settings
+from core.settings import settings
 
 logger = logging.getLogger(__name__)
 

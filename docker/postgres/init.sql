@@ -1,0 +1,7 @@
+CREATE USER app WITH PASSWORD 'app';
+CREATE USER mlflow WITH PASSWORD 'mlflow';
+CREATE USER optuna WITH PASSWORD 'optuna';
+
+CREATE DATABASE app_db OWNER app;
+CREATE DATABASE mlflow_db OWNER mlflow;
+CREATE DATABASE optuna_db OWNER optuna;

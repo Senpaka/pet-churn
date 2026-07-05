@@ -1,9 +1,6 @@
 import argparse
-import sys
 
 import pandas as pd
-import os
-import dotenv
 from pathlib import Path
 from sqlalchemy import create_engine, text, Engine
 

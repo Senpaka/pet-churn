@@ -1,3 +1,5 @@
+import argparse
+
 from mlflow import MlflowClient
 from mlflow.models import infer_signature
 from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
@@ -336,8 +338,15 @@ class TrainModel:
 
 if __name__ == "__main__":
 
-    df = pd.read_csv('datasets/customer.csv')
+    parser = argparse.ArgumentParser()
 
-    trainer = TrainModel()
+    parser.add_argument("--dataset-path", type=str, default="./datasets/dataset.csv")
 
-    trainer.train(df)
+    args = parser.parse_args()
+
+    if args.dataset_path:
+        df = pd.read_csv(args.dataset_path)
+
+        trainer = TrainModel()
+
+        trainer.train(df)

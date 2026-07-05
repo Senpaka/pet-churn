@@ -50,6 +50,7 @@ target/
 
 # Секреты и переменные окружения
 .env
+.env.docker
 .env.local
 .env.*.local
 *.pem
