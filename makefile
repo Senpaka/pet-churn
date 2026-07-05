@@ -21,6 +21,10 @@ export
 
 ALEMBIC_REVISION ?= base
 
+train:
+	@echo "Обучение модели"
+	python3 -m scripts.train_model
+
 mlflow-run:
 	@echo "Запуск mlflow"
 	mlflow server \
@@ -65,6 +69,10 @@ db-downgrade:
 db-revision:
 	@echo "Создание новой ревизии"
 	alembic revision --autogenerate -m "$(m)"
+
+db-seed:
+	@echo "Заполнение БД данными из .csv"
+	python3 -m scripts.init_db --load_customers datasets/dataset.csv
 
 docker-build:
 	@echo "Сборка Docker-образов"
