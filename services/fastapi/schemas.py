@@ -35,7 +35,7 @@ class CustomerFeatures(BaseModel):
     TotalCharges: float | None = Field(None, ge=0, description="The total charges")
 
 class PredictionResponse(BaseModel):
-    customer_id: int
+    customer_id: str
     prediction: str
     probability: float = Field(..., ge=0, le=1 ,description="The probability of the customer")
     risk: str
