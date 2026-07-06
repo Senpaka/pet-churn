@@ -10,6 +10,8 @@ def setup_logging(log_name: str = "tmp.log") -> None:
     :param log_name: имя файла лога
     """
 
+    paths.LOGS_DIR.mkdir(parents=True, exist_ok=True)
+
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",

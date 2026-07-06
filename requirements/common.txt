@@ -1,0 +1,11 @@
+pydantic==2.13.4
+pydantic-settings==2.14.2
+python-dotenv==1.2.2
+
+pandas==2.3.3
+numpy==2.5.0
+catboost==1.2.10
+mlflow==3.14.0
+
+SQLAlchemy==2.0.51
+psycopg2-binary==2.9.12
