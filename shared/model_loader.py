@@ -1,6 +1,7 @@
 import mlflow
 from mlflow import MlflowClient
 
+from shared.features import FeatureBuilder
 from shared.predict import Predictor
 from core.settings import settings
 
@@ -44,6 +45,7 @@ def load_predictor() -> Predictor:
 
     return Predictor(
         model=model,
+        feature_builder=FeatureBuilder(),
         threshold=threshold,
     )
 

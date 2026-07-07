@@ -12,9 +12,9 @@ class Predictor:
     Предназначен для более удобных предскзааний в api
     """
 
-    def __init__(self, model: CatBoostClassifier, threshold: float = 0.5):
+    def __init__(self, model: CatBoostClassifier, feature_builder: FeatureBuilder, threshold: float = 0.5):
         self.model = model
-        self.feature_builder = FeatureBuilder()
+        self.feature_builder = feature_builder
         self.threshold = threshold
 
     def predict(self, X: pd.DataFrame) -> np.ndarray:
