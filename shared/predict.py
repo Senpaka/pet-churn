@@ -1,6 +1,7 @@
+from typing import Any
+
 import numpy as np
 import pandas as pd
-from catboost import CatBoostClassifier
 
 from shared.features import FeatureBuilder
 
@@ -12,7 +13,7 @@ class Predictor:
     Предназначен для более удобных предскзааний в api
     """
 
-    def __init__(self, model: CatBoostClassifier, feature_builder: FeatureBuilder, threshold: float = 0.5):
+    def __init__(self, model: Any, feature_builder: FeatureBuilder, threshold: float = 0.5):
         self.model = model
         self.feature_builder = feature_builder
         self.threshold = threshold
