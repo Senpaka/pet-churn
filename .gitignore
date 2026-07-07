@@ -60,6 +60,6 @@ target/
 
 artifacts/
 catboost_info/
-datasets/
+datasets/real_dataset.csv
 notebooks/
 
