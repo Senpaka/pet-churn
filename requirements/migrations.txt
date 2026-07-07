@@ -1,0 +1,8 @@
+alembic==1.18.5
+SQLAlchemy==2.0.51
+psycopg2-binary==2.9.12
+pandas==2.3.3
+
+pydantic==2.13.4
+pydantic-settings==2.14.2
+python-dotenv==1.2.2

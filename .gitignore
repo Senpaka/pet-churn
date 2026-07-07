@@ -9,6 +9,7 @@ __pycache__/
 env/
 venv/
 ENV/
+.venv/
 env.bak/
 venv.bak/
 
@@ -49,10 +50,16 @@ target/
 
 # Секреты и переменные окружения
 .env
+.env.docker
 .env.local
 .env.*.local
 *.pem
 *.key
 *.crt
 *.p12
+
+artifacts/
+catboost_info/
+datasets/real_dataset.csv
+notebooks/
 

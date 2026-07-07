@@ -1,0 +1,39 @@
+from typing import Any
+
+import numpy as np
+import pandas as pd
+
+from shared.features import FeatureBuilder
+
+
+class Predictor:
+    """
+    Обертка для хранения модели, порога и билдера фичей
+
+    Предназначен для более удобных предскзааний в api
+    """
+
+    def __init__(self, model: Any, feature_builder: FeatureBuilder, threshold: float = 0.5):
+        self.model = model
+        self.feature_builder = feature_builder
+        self.threshold = threshold
+
+    def predict(self, X: pd.DataFrame) -> np.ndarray:
+        """
+        Возвращает список предсказаний List[(0/1)]
+        :param X: Входные данные
+        :return: Предсказания
+        """
+
+        prediction = self.predict_proba(X)
+        return (prediction >= self.threshold).astype(int)
+
+    def predict_proba(self, X: pd.DataFrame) -> np.ndarray:
+        """
+        Возвращает список с положительным классом предсказаний List[(0-1)]
+        :param X: Входные данные
+        :return: Предсказания
+        """
+
+        X = self.feature_builder.build(X)
+        return self.model.predict_proba(X)[:, 1]

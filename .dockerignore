@@ -1,0 +1,46 @@
+# Virtual environments
+.venv
+venv
+env
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.mypy_cache
+.ruff_cache
+
+# Git
+.git
+.gitignore
+
+# OS files
+.DS_Store
+
+# Notebooks
+notebooks
+.ipynb_checkpoints
+
+# Logs
+logs
+*.log
+
+# Local artifacts
+artifacts
+mlruns
+study.db
+*.db
+
+# Environment files
+.env
+.env.local
+.env.docker
+
+# Datasets
+datasets
+
+# Tests/cache
+.coverage
+htmlcov
