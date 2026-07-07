@@ -7,6 +7,7 @@ export
 	celery-cpu-run \
 	celery-io-run \
 	db-migrations \
+	db-seed \
 	db-downgrade \
 	db-revision \
 	docker-build \
